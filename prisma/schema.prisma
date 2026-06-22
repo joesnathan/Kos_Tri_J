@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  TENANT
+}
+
+enum KamarStatus {
+  Kosong
+  Terisi
+  Perbaikan
+}
+
+enum TagihanStatus {
+  BELUM_BAYAR
+  MENUNGGU_VERIFIKASI
+  LUNAS
+  DITOLAK
+}
+
+model User {
+  id        String      @id @default(uuid())
+  nama      String
+  email     String      @unique
+  password  String
+  role      Role        @default(TENANT)
+  nomorHp   String
+  kamarId   String?
+  kamar     Kamar?      @relation(fields: [kamarId], references: [id], onDelete: SetNull)
+  tagihan   Tagihan[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model Kamar {
+  id           String      @id @default(uuid())
+  nomorKamar   String      @unique
+  hargaBulanan Int
+  status       KamarStatus @default(Kosong)
+  users        User[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Tagihan {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nominal       Int
+  bulanTagihan  String // format: "YYYY-MM" (e.g., "2026-06") or month name
+  status        TagihanStatus @default(BELUM_BAYAR)
+  buktiTransfer BuktiTransfer?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model BuktiTransfer {
+  id            String   @id @default(uuid())
+  tagihanId     String   @unique
+  tagihan       Tagihan  @relation(fields: [tagihanId], references: [id], onDelete: Cascade)
+  fotoResi      String // URL to the receipt image (e.g., Supabase / Uploadthing)
+  tanggalUpload DateTime @default(now())
+  catatan       String?
+  alasanDitolak String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model RekeningPemilik {
+  id            String   @id @default(uuid())
+  namaBank      String
+  nomorRekening String
+  atasNama      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
