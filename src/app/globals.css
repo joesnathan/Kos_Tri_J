@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode selector in Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+@variant dark (.dark &);
+
+/* Force Times New Roman font family on all elements */
+* {
+  font-family: "Times New Roman", Times, serif !important;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  color-scheme: light;
+}
+
+/* Force dark mode variables */
+.dark, :root.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --background: #0a0a0a;
     --foreground: #ededed;
+    color-scheme: dark;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background) !important;
+  color: var(--foreground) !important;
 }
+
+/* Global Dark Mode Fallbacks for Tables, Calendars, and Cards */
+.dark body {
+  background-color: #0a0a0a !important;
+  color: #ededed !important;
+}
+
+.dark .bg-white {
+  background-color: #0f172a !important; /* bg-slate-900 equivalent */
+}
+
+/* Force dark backgrounds on common layouts */
+.dark .bg-slate-50,
+.dark .bg-slate-100,
+.dark .bg-slate-200,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-100\/50,
+.dark .bg-slate-50\/30 {
+  background-color: #0f172a !important; /* bg-slate-900 */
+}
+
+.dark .bg-slate-50\/65,
+.dark .bg-slate-950\/40,
+.dark .bg-slate-950\/50 {
+  background-color: #020617 !important; /* bg-slate-950 */
+}
+
+/* Global Table elements override in Dark Mode */
+.dark table,
+.dark thead,
+.dark tbody,
+.dark tr,
+.dark th {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #1e293b !important;
+}
+
+.dark td {
+  background-color: #0f172a !important;
+  color: #cbd5e1 !important;
+  border-color: #1e293b !important;
+}
+
+.dark thead th,
+.dark thead tr {
+  background-color: #020617 !important; /* Header is slightly darker */
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-850,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #f8fafc !important; /* slate text becomes white/light */
+}
+
+.dark .text-slate-655,
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #cbd5e1 !important; /* mid slate becomes slate-300 */
+}
+
+.dark .border-slate-200,
+.dark .border-slate-100,
+.dark .border-slate-202 {
+  border-color: #1e293b !important; /* border becomes slate-800 */
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+
+

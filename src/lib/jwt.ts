@@ -25,16 +25,23 @@ export async function signToken(payload: { id: string; email: string; role: stri
     .sign(getJwtSecretKey());
 }
 
+export interface JWTPayload {
+  id: string;
+  email: string;
+  role: string;
+}
+
 /**
  * Verifies a JWT token using HS256 signature algorithm.
  */
-export async function verifyToken(token: string): Promise<any> {
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getJwtSecretKey(), {
       algorithms: ['HS256'],
     });
-    return payload;
-  } catch (error) {
+    return payload as unknown as JWTPayload;
+  } catch {
     return null;
   }
 }
+

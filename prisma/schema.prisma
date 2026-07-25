@@ -25,17 +25,21 @@ enum TagihanStatus {
 }
 
 model User {
-  id        String      @id @default(uuid())
-  nama      String
-  email     String      @unique
-  password  String
-  role      Role        @default(TENANT)
-  nomorHp   String
-  kamarId   String?
-  kamar     Kamar?      @relation(fields: [kamarId], references: [id], onDelete: SetNull)
-  tagihan   Tagihan[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           String         @id @default(uuid())
+  nama         String
+  email        String         @unique
+  password     String
+  role         Role           @default(TENANT)
+  nomorHp      String
+  kamarId      String?
+  kamar        Kamar?         @relation(fields: [kamarId], references: [id], onDelete: SetNull)
+  tagihan      Tagihan[]
+  keluhan      Keluhan[]
+  notifikasi   Notifikasi[]
+  kontrak      Kontrak[]
+  logAktivitas LogAktivitas[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model Kamar {
@@ -44,20 +48,24 @@ model Kamar {
   hargaBulanan Int
   status       KamarStatus @default(Kosong)
   users        User[]
+  keluhan      Keluhan[]
+  kontrak      Kontrak[]
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
 
 model Tagihan {
-  id            String        @id @default(uuid())
-  userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  nominal       Int
-  bulanTagihan  String // format: "YYYY-MM" (e.g., "2026-06") or month name
-  status        TagihanStatus @default(BELUM_BAYAR)
-  buktiTransfer BuktiTransfer?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id               String        @id @default(uuid())
+  nomorInvoice     String?       @unique
+  userId           String
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nominal          Int
+  bulanTagihan     String // format: "YYYY-MM" (e.g., "2026-06") or month name
+  metodePembayaran String?       @default("Transfer Bank")
+  status           TagihanStatus @default(BELUM_BAYAR)
+  buktiTransfer    BuktiTransfer?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
 
 model BuktiTransfer {
@@ -79,4 +87,97 @@ model RekeningPemilik {
   atasNama      String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Keluhan {
+  id        String    @id @default(uuid())
+  deskripsi String
+  kamarId   String
+  kamar     Kamar     @relation(fields: [kamarId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    User      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  prioritas String    @default("Sedang") // "Rendah", "Sedang", "Tinggi"
+  status    String    @default("Baru") // "Baru", "Diproses", "Selesai", "Ditutup"
+  balasan   String?
+  balasanAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model ProfilKos {
+  id        String   @id @default(uuid())
+  namaKos   String   @default("Kos Tri J")
+  nomorHp   String   @default("081234567890")
+  alamat    String   @default("Jl. Mawar No. 12, Kebayoran Baru")
+  kota      String   @default("Jakarta Selatan")
+  kodePos   String   @default("12345")
+  website   String   @default("https://kosmaju.com")
+  logoUrl   String?  @default("/images/default-logo.png")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Pengeluaran {
+  id        String   @id @default(uuid())
+  kategori  String // "Listrik", "Air", "Internet", "Maintenance", "Kebersihan", "Lainnya"
+  deskripsi String
+  nominal   Int
+  tanggal   DateTime @default(now())
+  adaResi   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notifikasi {
+  id        String   @id @default(uuid())
+  judul     String
+  deskripsi String
+  tautan    String?
+  dibaca    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LogAktivitas {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  namaUser  String?
+  role      String?
+  tipe      String
+  deskripsi String
+  ipAddress String?
+  device    String?
+  browser   String?
+  createdAt DateTime @default(now())
+}
+
+model Jadwal {
+  id        String   @id @default(uuid())
+  judul     String
+  deskripsi String?
+  tanggal   DateTime
+  tipe      String   @default("lainnya") // "pembayaran", "maintenance", "kontrak", "lainnya"
+  tautan    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Kontrak {
+  id             String   @id @default(uuid())
+  tenantId       String
+  tenant         User     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kamarId        String?
+  kamar          Kamar?   @relation(fields: [kamarId], references: [id], onDelete: SetNull)
+  nomorKontrak   String   @unique
+  tanggalMulai   DateTime
+  tanggalSelesai DateTime
+  durasiBulan    Int      @default(12)
+  status         String   @default("Aktif") // "Aktif", "Hampir Habis", "Selesai", "Dibatalkan"
+  fileUrl        String?
+  catatan        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

@@ -32,6 +32,10 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/dashboard/tenant') && payload.role !== 'TENANT') {
       return NextResponse.redirect(new URL('/login', request.url));
     }
+
+    const response = NextResponse.next();
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+    return response;
   }
 
   return NextResponse.next();
